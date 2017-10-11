@@ -29,7 +29,7 @@ def clean_data():
     file_string = file.read().lower()
     translator = str.maketrans('', '', string.punctuation) # Remove punctuations
     file_string_no_punct = file_string.translate(translator) # string
-    file_string_no_stopwords = re.findall(r'\b[a-z]{3,15}\b', file_string_no_punct) # list. Remove all the words that only have one or two letters.
+    file_string_no_stopwords = re.findall(r'\b[a-z]{2,15}\b', file_string_no_punct) # list. Remove all the words that only have one letter.
     file_string_no_stopwords = ' '.join(file_string_no_stopwords) # convert a list to string
     tokenize_file = word_tokenize(file_string_no_stopwords) # Tokenize words
     stop_words = set(stopwords.words('English')) # Remove stop words
@@ -42,7 +42,7 @@ def fdist_top(file, top_n):
     
     """
     Parameters:   
-       file: file name 
+       file: file name of a tokenized file
        top_n: the number of most occurring words
     """
     fdist = nltk.FreqDist(file)
@@ -84,6 +84,32 @@ def log_likelihood_ratio(wordVec, file1, file2):
     g_dict = dict(zip(wordVec, g_test))
     return g_dict
 
+# Function ftag_dist finds the top n most occurring words based on the tag name
+# For example, top 10 most common used adjective
+
+def ftag_dist(file, tag_name, top_n):
+    
+    """
+    parameter:
+        file: tokenized words 
+        tag_name: JJ(adjective), RB(adverb), CC(conjunction), IN(preposition), NN(noun) etc.
+        top_n: a number defines how many most common words shown
+
+    Post-Of-Speech Tag    
+    
+    This function is slow because of the tagging and tokenizing part
+    This function should be revised
+    """
+    file_tag = nltk.pos_tag(file)
+    word_list = [word for (word,tag) in file_tag if tag == tag_name]
+    word_string = ' '.join(word_list)
+    word_tokenize = nltk.word_tokenize(word_string)
+    word_fdist = nltk.FreqDist(word_tokenize)
+    most_commn_words = word_fdist.most_common(top_n)
+    return(most_commn_words)
+    
+    
+
 #%%
 #Testing Example:
     
@@ -93,3 +119,20 @@ word_list = fdist_top(emma, 10)
 word_list_test = [word_list[i][0] for i in range(len(word_list))]
 g_stats = log_likelihood_ratio(wordVec = word_list_test, file1 = emma, file2 = caesar)   
 print(g_stats)
+
+#%%
+emma = clean_data()
+emma_tag = nltk.pos_tag(emma)
+
+#%%
+tag_fd = nltk.FreqDist(tag for (word,tag) in emma_tag)
+tag_fd.most_common(10)
+
+#%%
+emma_JJ = [word for (word,tag) in emma_tag if tag == 'JJ']
+emma_JJ = ' '.join(emma_JJ)
+emma_JJ = nltk.word_tokenize(emma_JJ)
+emma_JJ_fdist = nltk.FreqDist(emma_JJ)
+emma_JJ_fdist.most_common(10)
+
+
