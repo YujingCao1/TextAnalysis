@@ -101,7 +101,7 @@ fdist_caesar.most_common(20)
 emma_could = fdist['could']
 emma_no_could = len(tokenize_emma_clean) - emma_could
 
-caesar_could = fdist['could']
+caesar_could = fdist_caesar['could']
 caesar_no_could = len(tokenize_caesar_clean) - caesar_could
 
 import numpy as np
@@ -117,6 +117,9 @@ g, p, dof, expected = chi2_contingency(caeser_emma, lambda_= 'log-likelihood')
 # G = 2*sum(O_i*ln(O_i/E_i))
 import math
 2*(emma_could*math.log(emma_could/expected[0,0]) + caesar_could*math.log(caesar_could/expected[1,0]))
+
+#%%
+
 
 #%%
 # Define a function to get G-test for a list of words

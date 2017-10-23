@@ -6,6 +6,11 @@ Created on Mon Oct  9 15:19:40 2017
 
 Text Analysis
 """
+#%%
+# Download nltk corpora
+# This step is not necessary if you have your own corpus. 
+import nltk
+nltk.download()
 
 #%%
 # Import all the modules
@@ -21,8 +26,11 @@ from scipy.stats import chi2_contingency
 # Remove stop words and punctuations
 
 def clean_data():
+    """
+    output: clean file without stop words or punctuations
+    """
     
-    print("You'll need to fine the necessary data files on your own copmuter")
+    print("Please Select analysis/reference file")
     root = Tk()
     root.filename = filedialog.askopenfilename(initialdir = "/", title = "Select file", filetypes = (("text files", "*.txt"), ("all files", "*.*")))
     file = open(root.filename, "r")
@@ -43,25 +51,23 @@ def fdist_top(file, top_n):
     """
     Parameters:   
        file: file name of a tokenized file
-       top_n: the number of most occurring words
+       top_n: a number that defines how many most common words shown
     """
     fdist = nltk.FreqDist(file)
     most_common_words = fdist.most_common(top_n)
     return most_common_words
 
-# Function log_likelihood_ratio returns G-test
-# Parameter: wordVec is a list of word for usage comparisons
-
+# Function log_likelihood_ratio returns G-test statistics
 def log_likelihood_ratio(wordVec, file1, file2):
     
     """
     Parameter:
         wordVec: a list of words for usage comparisons
-        file1: tokenized analysis text
-        file2: tokenized reference text (baseline)
+        file1: analysis text that has been cleaned by clean_data()
+        file2: clean reference text (baseline) that has been cleaned by clean_data()
     
     Output:
-        g_dict: a dictionary to store words and corresponding log likelihood ratio
+        g_dict: a dictionary to store words and corresponding log likelihood ratios
     """
     g_test = []
     
@@ -93,12 +99,12 @@ def ftag_dist(file, tag_name, top_n):
     parameter:
         file: tokenized words 
         tag_name: JJ(adjective), RB(adverb), CC(conjunction), IN(preposition), NN(noun) etc.
-        top_n: a number defines how many most common words shown
+        top_n: a number that defines how many most common words shown
 
     Post-Of-Speech Tag    
     
-    This function is slow because of the tagging and tokenizing part
-    This function should be revised
+    This function is slow because of the tagging and tokenization part.
+    It needs to be revised. Something is not right!
     """
     file_tag = nltk.pos_tag(file)
     word_list = [word for (word,tag) in file_tag if tag == tag_name]
@@ -107,32 +113,11 @@ def ftag_dist(file, tag_name, top_n):
     word_fdist = nltk.FreqDist(word_tokenize)
     most_commn_words = word_fdist.most_common(top_n)
     return(most_commn_words)
-    
-    
 
 #%%
-#Testing Example:
-    
+# Example
 emma = clean_data()
 caesar = clean_data()
-word_list = fdist_top(emma, 10)
-word_list_test = [word_list[i][0] for i in range(len(word_list))]
-g_stats = log_likelihood_ratio(wordVec = word_list_test, file1 = emma, file2 = caesar)   
-print(g_stats)
-
-#%%
-emma = clean_data()
-emma_tag = nltk.pos_tag(emma)
-
-#%%
-tag_fd = nltk.FreqDist(tag for (word,tag) in emma_tag)
-tag_fd.most_common(10)
-
-#%%
-emma_JJ = [word for (word,tag) in emma_tag if tag == 'JJ']
-emma_JJ = ' '.join(emma_JJ)
-emma_JJ = nltk.word_tokenize(emma_JJ)
-emma_JJ_fdist = nltk.FreqDist(emma_JJ)
-emma_JJ_fdist.most_common(10)
-
-
+emma_top10 = fdist_top(emma, 10)
+word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))] # convert to a word list
+log_likelihood_ratio(word_list, emma, caesar)
