@@ -1,0 +1,11 @@
+#header{
+	text-align: center;
+	background-color: rgba(26, 139, 239, 0.6);
+	color: black;
+	font-family: 'Lobster', cursive;
+	height: 4%;
+	width: 100%;
+	padding: 10px 0 10px 0;
+	margin-top: 0;
+	margin-left: 0;
+}

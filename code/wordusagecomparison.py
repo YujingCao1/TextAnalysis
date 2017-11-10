@@ -10,7 +10,7 @@ Text Analysis
 # Download nltk corpora
 # This step is not necessary if you have your own corpus. 
 import nltk
-nltk.download()
+#nltk.download()
 
 #%%
 # Import all the modules
@@ -21,7 +21,8 @@ from tkinter import *
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from scipy.stats import chi2_contingency
-
+import os
+from chardet.universaldetector import UniversalDetector
 # Function clean_data can be used to import analysis or reference text (baseline)
 # Remove stop words and punctuations
 
@@ -33,7 +34,8 @@ def clean_data():
     print("Please Select analysis/reference file")
     root = Tk()
     root.filename = filedialog.askopenfilename(initialdir = "/", title = "Select file", filetypes = (("text files", "*.txt"), ("all files", "*.*")))
-    file = open(root.filename, "r")
+    encodeRule = encodingDetectorByLine(root.filename)
+    file = open(root.filename, "r", encoding = encodeRule)
     file_string = file.read().lower()
     translator = str.maketrans('', '', string.punctuation) # Remove punctuations
     file_string_no_punct = file_string.translate(translator) # string
@@ -114,10 +116,19 @@ def ftag_dist(file, tag_name, top_n):
     most_commn_words = word_fdist.most_common(top_n)
     return(most_commn_words)
 
+def encodingDetectorByLine(filename):
+    detector = UniversalDetector()
+    for line in open(filename, 'rb'):
+        detector.feed(line)
+        if detector.done:
+            break
+    detector.close()
+    encodeName = detector.result['encoding']
+    return encodeName
 #%%
 # Example
 emma = clean_data()
 caesar = clean_data()
 emma_top10 = fdist_top(emma, 10)
 word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))] # convert to a word list
-log_likelihood_ratio(word_list, emma, caesar)
+print(log_likelihood_ratio(word_list, emma, caesar))
