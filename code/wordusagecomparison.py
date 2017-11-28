@@ -117,6 +117,11 @@ def ftag_dist(file, tag_name, top_n):
     return(most_commn_words)
 
 def encodingDetectorByLine(filename):
+    """
+    filename: name of the file that needs to be decided what encode method is
+    
+    return the encode method name
+    """
     detector = UniversalDetector()
     for line in open(filename, 'rb'):
         detector.feed(line)
@@ -126,9 +131,9 @@ def encodingDetectorByLine(filename):
     encodeName = detector.result['encoding']
     return encodeName
 #%%
-# Example
-emma = clean_data()
-caesar = clean_data()
-emma_top10 = fdist_top(emma, 10)
-word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))] # convert to a word list
-print(log_likelihood_ratio(word_list, emma, caesar))
+# Testing Example
+#emma = clean_data()
+#caesar = clean_data()
+#emma_top10 = fdist_top(emma, 10)
+#word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))] # convert to a word list
+#print(log_likelihood_ratio(word_list, emma, caesar))
