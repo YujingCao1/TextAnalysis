@@ -130,10 +130,3 @@ def encodingDetectorByLine(filename):
     detector.close()
     encodeName = detector.result['encoding']
     return encodeName
-#%%
-# Testing Example
-#emma = clean_data()
-#caesar = clean_data()
-#emma_top10 = fdist_top(emma, 10)
-#word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))] # convert to a word list
-#print(log_likelihood_ratio(word_list, emma, caesar))
