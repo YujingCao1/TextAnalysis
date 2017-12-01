@@ -12,7 +12,7 @@ from dash.dependencies import Output, Input, State
 import wordusagecomparison as wd
 import pandas as pd
 import base64
-import io,os
+import io,os, json
 import nltk,re, string, scipy
 import numpy as np
 from tkinter import filedialog
@@ -34,18 +34,6 @@ from scipy.stats import chi2_contingency
 #        'Likelihood Ratio': lr_value,
 #        'Word': lr_word})
 
-
-def generate_table(dataframe, max_rows=50):
-    return html.Table(
-            # Header
-            [html.Tr([html.Th(col) for col in dataframe.columns])] + 
-            
-            # Body
-            [html.Tr([
-                    html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-                    ]) for i in range(min(len(dataframe), max_rows))]
-            )
-
 app = dash.Dash()
 
 app.layout = html.Div([
@@ -64,11 +52,30 @@ app.layout = html.Div([
                  html.Br(),
                  dcc.Input(id = 'no_words', type = 'text', value = 10)
                 ]),
-        
-       html.Div([ html.H4(children='Word Usage Comparison'),
+
+        html.Div([
+                 html.H5('A list of Words of Interest:'),
+                 html.Br(),
+                 html.Div(id = 'wd-list')
+                ]),
+
+        html.Div([ 
+                html.H4('Word Usage Comparison'),
+                html.Div(id = 'Comparison-Table')
         ])
     ])
-    
+
+def generate_table(dataframe, max_rows=50):
+    return html.Table(
+            # Header
+            [html.Tr([html.Th(col) for col in dataframe.columns])] + 
+            
+            # Body
+            [html.Tr([
+                    html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+                    ]) for i in range(min(len(dataframe), max_rows))]
+            )
+
 def parse_contents():
     filename = filedialog.askopenfilename(initialdir = "/", title = "Select file", filetypes = (("text files", "*.txt"), ("all files", "*.*")))
     try:
@@ -88,10 +95,11 @@ def parse_contents():
         return html.Div([
                 'There was an error processing this file.'
                 ])
-    return html.Div([
-            html.H5(os.path.basename(filename))]
-    )
-
+#    return html.Div([
+#            html.H5(os.path.basename(filename))]
+#    )
+    return tokenize_file_clean
+ 
 @app.callback(
     Output(component_id='analysis-file', component_property='children'),
     [Input('button1', 'n_clicks')]
@@ -113,7 +121,38 @@ def update_reference(no_click):
                 parse_contents()
                 ]
         return children
-    
+  
+@app.callback(
+        Output(component_id='wd-list', component_property = 'children'),
+        [Input('analysis-file', 'children'),
+         Input('no_words', 'value')]
+        )
+def top_words(list_of_words, number_of_words):
+    wd_list = wd.fdist_top(list_of_words, number_of_words)
+    top_n_wd = [wd_list[i][0] for i in range(0, len(wd_list))]
+    return top_n_wd
+
+@app.callback(
+        Output(component_id='Comparison-Table', component_property='children'),
+        [Input('wd-list', 'children'),
+         Input('analysis-file', 'children'),
+         Input('reference-file', 'children')
+        ])
+def likelihood_ratio(lists_of_words, analysis_file, reference_file):
+    if lists_of_words is not None:
+        likelihood_ratio = wd.log_likelihood_ratio(lists_of_words,
+                                                   analysis_file, reference_file)
+        lr_df = pd.DataFrame(likelihood_ratio, index=[1])
+        lr_word = lr_df.columns.get_values().tolist()
+        lr_value = round(lr_df.loc[1,:],3).tolist()
+        lr_df_reshape = pd.DataFrame({
+                'Likelihood Ratio': lr_value,
+                'Word': lr_word})
+        children = [
+                generate_table(lr_df_reshape)
+                ]
+        return children
+  
 if __name__ == "__main__":
     app.run_server(debug=True)
     
