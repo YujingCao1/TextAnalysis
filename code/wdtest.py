@@ -12,17 +12,17 @@ from dash.dependencies import Output, Input, State
 import wordusagecomparison as wd
 import pandas as pd
 
-emma = wd.clean_data()
-caesar = wd.clean_data()
-emma_top10 = wd.fdist_top(emma, 20)
-word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))]
-likelihood_ratio = wd.log_likelihood_ratio(word_list, emma, caesar)
-lr_df = pd.DataFrame(likelihood_ratio, index=[1])
-lr_word = lr_df.columns.get_values().tolist()
-lr_value = round(lr_df.loc[1,:],3).tolist()
-lr_df_reshape = pd.DataFrame({
-        'Likelihood Ratio': lr_value,
-        'Word': lr_word})
+#emma = wd.clean_data()
+#caesar = wd.clean_data()
+#emma_top10 = wd.fdist_top(emma, 20)
+#word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))]
+#likelihood_ratio = wd.log_likelihood_ratio(word_list, emma, caesar)
+#lr_df = pd.DataFrame(likelihood_ratio, index=[1])
+#lr_word = lr_df.columns.get_values().tolist()
+#lr_value = round(lr_df.loc[1,:],3).tolist()
+#lr_df_reshape = pd.DataFrame({
+#        'Likelihood Ratio': lr_value,
+#        'Word': lr_word})
 
 
 def generate_table(dataframe, max_rows=50):
@@ -39,21 +39,30 @@ def generate_table(dataframe, max_rows=50):
 app = dash.Dash()
 
 app.layout = html.Div([
-        html.Button(id = 'submit-Button1', n_clicks = 0, children = 'Select Analysis File'),
-        html.Div(id = 'analysis-file'),
+        html.Div([
+                 dcc.Upload(html.Button(id = 'submit-Button1', n_clicks = 0, children = 'Select an Analysis File')),
+                 html.Div(id = 'analysis-file')
+                ],
+            style = {
+                    'width': '30%',
+                    'height': '30%',
+                    'textAlign': 'center'
+                    }),
         
-        html.Hr(),
+        html.Div([
+                   dcc.Upload(html.Button(id = 'submit-Button2', n_clicks = 0, children = 'Select a Reference File')),
+                   html.Div(id = 'reference-file')
+                ]),
+    
+        html.Div([
+                 html.Label('List the Top N Most Occuring Words'),
+                 html.Br(),
+                 dcc.Input(id = 'no_words', type = 'text', value = 10)
+                ]),
         
-        html.Button(id = 'submit-Button2', n_clicks = 0, children = 'Select Reference File'),
-        html.Div(id = 'reference-file'),
-        
-        html.Hr(),
-        
-        dcc.Input(id = 'no_words', type = 'text', value = 10),
-        
-        html.H4(children='Word Usage Comparison'),
-        generate_table(lr_df_reshape)
+       html.Div([ html.H4(children='Word Usage Comparison')
         ])
+    ])
     
 if __name__ == "__main__":
     app.run_server(debug=True)
