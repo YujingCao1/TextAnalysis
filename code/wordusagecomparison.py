@@ -130,3 +130,16 @@ def encodingDetectorByLine(filename):
     detector.close()
     encodeName = detector.result['encoding']
     return encodeName
+
+#%%
+#emma = wd.clean_data()
+#caesar = wd.clean_data()
+#emma_top10 = wd.fdist_top(emma, 20)
+#word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))]
+#likelihood_ratio = wd.log_likelihood_ratio(word_list, emma, caesar)
+#lr_df = pd.DataFrame(likelihood_ratio, index=[1])
+#lr_word = lr_df.columns.get_values().tolist()
+#lr_value = round(lr_df.loc[1,:],3).tolist()
+#lr_df_reshape = pd.DataFrame({
+#        'Likelihood Ratio': lr_value,
+#        'Word': lr_word})
