@@ -83,10 +83,11 @@ def parse_contents():
         return html.Div([
                 'There was an error processing this file.'
                 ])
+#    return html.Div([
+#            html.H5(os.path.basename(filename))]
+#    )
     return html.Div([
-            html.H5(os.path.basename(filename))]
-    )
-    return tokenize_file_clean
+            tokenize_file_clean])
  
 @app.callback(
     Output(component_id='analysis-file', component_property='children'),
@@ -122,31 +123,37 @@ def update_word_number(n_word):
         [Input('analysis-file', 'children'),
          Input('no_words', 'value')]
         )
-def top_words(list_of_words, number_of_words):
-    wd_list = wd.fdist_top(list_of_words, number_of_words)
-    top_n_wd = [wd_list[i][0] for i in range(0, len(wd_list))]
-    return top_n_wd
-
-@app.callback(
-        Output(component_id='Comparison-Table', component_property='children'),
-        [Input('wd-list', 'children'),
-         Input('analysis-file', 'children'),
-         Input('reference-file', 'children')
-        ])
-def likelihood_ratio(lists_of_words, analysis_file, reference_file):
-    if lists_of_words is not None:
-        likelihood_ratio = wd.log_likelihood_ratio(lists_of_words,
-                                                   analysis_file, reference_file)
-        lr_df = pd.DataFrame(likelihood_ratio, index=[1])
-        lr_word = lr_df.columns.get_values().tolist()
-        lr_value = round(lr_df.loc[1,:],3).tolist()
-        lr_df_reshape = pd.DataFrame({
-                'Likelihood Ratio': lr_value,
-                'Word': lr_word})
+def top_words(analysis_file, number_of_words):
+    wd_list = wd.fdist_top(analysis_file, number_of_words)
+    if number_of_words!=0:
+        top_n_wd = []
+        top_n_wd = [wd_list[i][0] for i in range(0, len(wd_list))]
         children = [
-                generate_table(lr_df_reshape)
+                top_n_wd
                 ]
-        return children
+    return children
+
+
+#@app.callback(
+#        Output(component_id='Comparison-Table', component_property='children'),
+#        [Input('wd-list', 'children'),
+#         Input('analysis-file', 'children'),
+#         Input('reference-file', 'children')
+#        ])
+#def likelihood_ratio(lists_of_words, analysis_file, reference_file):
+#    if lists_of_words is not None:
+#        likelihood_ratio = wd.log_likelihood_ratio(lists_of_words,
+#                                                   analysis_file, reference_file)
+#        lr_df = pd.DataFrame(likelihood_ratio, index=[1])
+#        lr_word = lr_df.columns.get_values().tolist()
+#        lr_value = round(lr_df.loc[1,:],3).tolist()
+#        lr_df_reshape = pd.DataFrame({
+#                'Likelihood Ratio': lr_value,
+#                'Word': lr_word})
+#        children = [
+#                generate_table(lr_df_reshape)
+#                ]
+#        return children
   
 if __name__ == "__main__":
     app.run_server(debug=True)
