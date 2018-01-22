@@ -165,20 +165,24 @@ def encodingDetectorByLine(filename):
     return encodeName
 
 #%%
-emma = clean_data()
-caesar = clean_data()
-emma_top10 = fdist_top(emma, 20)
-word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))]
-likelihood_ratio = log_likelihood_ratio(word_list, emma, caesar)
-lr_df = pd.DataFrame(likelihood_ratio, index=[1])
-lr_word = lr_df.columns.get_values().tolist()
-lr_value = round(lr_df.loc[1,:],3).tolist()
-lr_df_reshape = pd.DataFrame({
-        'Word': lr_word,
-        'Likelihood Ratio': lr_value})
-print(lr_df_reshape)
-
-#%%
-mann_whitney_rho(word_list, emma, caesar)
-#%%
-mannwhitneyu(np.arange(1), np.arange(1,2))[1]
+#==============================================================================
+# emma = clean_data()
+# caesar = clean_data()
+# emma_top10 = fdist_top(emma, 20)
+# word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))]
+# #%%
+# likelihood_ratio = log_likelihood_ratio(word_list, emma, caesar)
+# lr_df = pd.DataFrame(likelihood_ratio, index=[1])
+# lr_word = lr_df.columns.get_values().tolist()
+# lr_value = round(lr_df.loc[1,:],3).tolist()
+# #%%
+# lr_df_reshape = pd.DataFrame({
+#         'Word': lr_word,
+#         'Likelihood Ratio': lr_value})
+# print(lr_df_reshape)
+# 
+# #%%
+# mann_whitney_rho(word_list, emma, caesar)
+# #%%
+# mannwhitneyu(np.arange(1), np.arange(1,2))[1]
+#==============================================================================

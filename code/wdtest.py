@@ -37,7 +37,7 @@ app.layout = html.Div([
         html.Div([
                  html.Label('List the Top N Most Occuring Words'),
                  html.Br(),
-                 dcc.Input(id = 'no_words', type = 'text', value = 10),
+                 dcc.Input(id = 'no_words', type = 'number', value = '20'),
                  html.Div(id = 'words_number')
                 ]),
 
@@ -89,33 +89,36 @@ def parse_contents():
     return html.Div([
             tokenize_file_clean])
  
-@app.callback(
-    Output(component_id='analysis-file', component_property='children'),
-    [Input('button1', 'n_clicks')]
-)
-def update_analysis(no_click):
-    if no_click != 0:
-        children = [
-                parse_contents()
-                ]
-        return children
-
-@app.callback(
-        Output(component_id='reference-file', component_property='children'),
-        [Input('button2', 'n_clicks')]
-)
-def update_reference(no_click):
-    if no_click!=0:
-        children = [
-                parse_contents()
-                ]
-        return children
+#==============================================================================
+# @app.callback(
+#     Output(component_id='analysis-file', component_property='children'),
+#     [Input('button1', 'n_clicks')]
+# )
+# def update_analysis(no_click):
+#     if no_click != 0:
+#         children = [
+#                 parse_contents()
+#                 ]
+#         return children
+# 
+# @app.callback(
+#         Output(component_id='reference-file', component_property='children'),
+#         [Input('button2', 'n_clicks')]
+# )
+# def update_reference(no_click):
+#     if no_click!=0:
+#         children = [
+#                 parse_contents()
+#                 ]
+#         return children
+#==============================================================================
 
 @app.callback(
         Output(component_id = 'words_number', component_property = 'children'),
-        [Input('no_words', 'value')]
+        [Input(component_id = 'no_words', component_property = 'value')]
         )
 def update_word_number(n_word):
+    n_word = int(n_word)
     return 'The following Table will list top {} words'.format(n_word)
 
 @app.callback(
