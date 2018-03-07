@@ -24,6 +24,7 @@ from nltk.corpus import stopwords
 from scipy.stats import chi2_contingency, mannwhitneyu
 import os
 from chardet.universaldetector import UniversalDetector
+from statsmodels.sandbox.stats.multicomp import multipletests
 # Function clean_data can be used to import analysis or reference text (baseline)
 # Remove stop words and punctuations
 
@@ -73,6 +74,7 @@ def log_likelihood_ratio(wordVec, file1, file2):
         g_dict: a dictionary to store words and corresponding log likelihood ratios
     """
     g_test = []
+    p_test = []
     
     file1_dist = nltk.FreqDist(file1) # frequency distribution of all the words
     file2_dist = nltk.FreqDist(file2)
@@ -89,40 +91,15 @@ def log_likelihood_ratio(wordVec, file1, file2):
         contigency_table = np.array([[file1_w, file1_no_w],
                                 [file2_w, file2_no_w]])
         g, p, dof, expected = chi2_contingency(contigency_table, lambda_= 'log-likelihood')
+        p_test.append(p)
         g_test.append(g)
+    
+    # Multiple testing adjustment with Bonferroni test
+    p_test_adjust = multipletests(p_test, alpha = 0.05, method = 'bonferroni', is_sorted = False, returnsorted = False)
+    adjust_pval = np.asarray(p_test_adjust)[1] # Extract adjusted p-values from tuple
     g_dict = dict(zip(wordVec, g_test))
-    return g_dict
-
-
-# Function mann_whitney_rho returns the Mann-Whitney U Test
-# Debug the mann_whitney_rho function
-def mann_whitney_rho(wordvec, file1, file2):
-    
-    """
-    Parameter:
-            wordvec: a list of words for usage comparisons
-            file1: analysis text that has been cleaned by clean_data()
-            file2: clean reference text(baseline) that has been cleaned by clean_data()
-    
-    Output:
-            u_stats: a dictionary to store words and corresponding Mann-Whitney U Statistics
-    """
-    file1_dist = nltk.FreqDist(file1)
-    file2_dist = nltk.FreqDist(file2)
-    
-    u_stats = []
-    for w  in wordvec:
-        file1_w = file1_dist[w]
-        file2_w = file2_dist[w]
-        file1_array = np.asarray(file1_w)  # convert a list to an array
-        file2_array = np.asarray(file2_w)
-        
-        u_test = mannwhitneyu(file1_array, file2_array)
-        u_stats.append(u_test[1])
-    u_df = pd.DataFrame({
-            'Word': wordvec,
-            'Mann-Whitney-Rho': u_stats})
-    return u_df
+    p_dict = dict(zip(wordVec, adjust_pval))
+    return g_dict, p_dict
         
 
 # Function ftag_dist finds the top n most occurring words based on the tag name
@@ -164,25 +141,36 @@ def encodingDetectorByLine(filename):
     encodeName = detector.result['encoding']
     return encodeName
 
-#%%
+
 #==============================================================================
-# emma = clean_data()
-# caesar = clean_data()
-# emma_top10 = fdist_top(emma, 20)
-# word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))]
-# #%%
-# likelihood_ratio = log_likelihood_ratio(word_list, emma, caesar)
-# lr_df = pd.DataFrame(likelihood_ratio, index=[1])
-# lr_word = lr_df.columns.get_values().tolist()
-# lr_value = round(lr_df.loc[1,:],3).tolist()
-# #%%
-# lr_df_reshape = pd.DataFrame({
-#         'Word': lr_word,
-#         'Likelihood Ratio': lr_value})
-# print(lr_df_reshape)
-# 
-# #%%
-# mann_whitney_rho(word_list, emma, caesar)
-# #%%
-# mannwhitneyu(np.arange(1), np.arange(1,2))[1]
+#   #%%
+#    emma = clean_data()
+#    caesar = clean_data()
+#    emma_top10 = fdist_top(emma, 20)
+#    word_list = [emma_top10[i][0] for i in range(0,len(emma_top10))]
+#    #%%
+#    likelihood_ratio = log_likelihood_ratio(word_list, emma, caesar)
+#    #print(likelihood_ratio[1])
+#    #%%
+#    lr_df = pd.DataFrame(np.asarray(likelihood_ratio)[0], index=[1])
+#    print(lr_df)
+#    lr_word = lr_df.columns.get_values().tolist()
+#    lr_value = round(lr_df.loc[1,:],3).tolist()
+#    
+#    pval_df = pd.DataFrame(np.asarray(likelihood_ratio)[1], index=[1])
+#    print(pval_df)
+#    p_value = pval_df.loc[1,:].tolist()
+#    #%%
+#    lr_df_reshape = pd.DataFrame({
+#            'Word': lr_word,
+#            'Likelihood Ratio': lr_value,
+#            'P-value': p_value
+#            })
+#    print(lr_df_reshape)
+#    
+#    #%%
+#    mann_whitney_rho(word_list, emma, caesar)
+#    #%%
+#    mannwhitneyu(np.arange(1), np.arange(1,2))[1]
+#   
 #==============================================================================
